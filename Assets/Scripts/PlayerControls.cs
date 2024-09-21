@@ -13,10 +13,14 @@ public class PlayerControls : MonoBehaviour
    [SerializeField] private float currentSpeed = 0f;
 
     [SerializeField] float[] gearSpeeds = { -2f, 0f, 2f, 4f, 6f, 8f };
+    [SerializeField] float[] gearLowestSpeeds;
 
     [SerializeField] private Gear currentGear = Gear.Neutral;
 
+    bool carHasStarted, carHasStalled;
 
+  [SerializeField]  float maxCurrentSpeed;
+    [SerializeField] float lowestCurrentSpeed;
 
     private void Update()
     {
@@ -30,7 +34,24 @@ public class PlayerControls : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.UpArrow) && currentGear < Gear.Fifth)
         {
-            currentGear++;
+
+            if (currentGear == Gear.Neutral)
+            {
+                currentGear++;
+                return;
+            }
+
+
+            if (currentSpeed > gearSpeeds[(int) currentGear] * 0.8f)
+            {
+                currentGear++;
+            }
+            else
+            {
+                print("go faster ");
+            }
+
+            
         }
         else if(Input.GetKeyDown(KeyCode.DownArrow) && currentGear > Gear.Neutral)
         {
@@ -38,7 +59,8 @@ public class PlayerControls : MonoBehaviour
         }
 
 
-        float maxCurrentSpeed = gearSpeeds[(int) currentGear];
+        maxCurrentSpeed = gearSpeeds[(int) currentGear];
+        lowestCurrentSpeed = gearLowestSpeeds[(int) currentGear];
 
         // Apply acceleration or deceleration based on input
         if (movementForward != 0f)  // When player presses W or S
@@ -73,7 +95,21 @@ public class PlayerControls : MonoBehaviour
 
     private void StallCar()
     {
-        if(currentSpeed <=3 && currentGear == Gear.Fifth) { print("stall");
+
+
+        if (currentGear == Gear.First)
+        {
+            return;
         }
-    }
+        if (currentSpeed < lowestCurrentSpeed)
+        {
+            currentGear = Gear.Neutral;
+        }
+
+        
+
+        
+    } 
+
+ 
 }
