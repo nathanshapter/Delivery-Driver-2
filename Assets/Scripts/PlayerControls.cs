@@ -81,6 +81,8 @@ public class PlayerControls : MonoBehaviour
         transform.Rotate(0, 0, -steerAmount * steerSpeed );
         // moves the vehicle forward and back
         transform.Translate(0, currentSpeed * Time.deltaTime * moveSpeed, 0);
+
+       
     }
 
     public enum Gear
@@ -110,6 +112,10 @@ public class PlayerControls : MonoBehaviour
 
         
     } 
-
+    public float CurrentSpeedInKM()
+    {
+        float currentSpeedInKM = currentSpeed * 18;
+        return currentSpeedInKM;
+    }
  
 }
