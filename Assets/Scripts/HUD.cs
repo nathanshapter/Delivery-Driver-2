@@ -16,6 +16,11 @@ public class HUD : MonoBehaviour
 
     private void Update()
     {
-        speedText.text = playerControls.CurrentSpeedInKM().ToString("F1") + " km/h";
+        speedText.text = playerControls.speedInKMH.ToString("F1") + " km/h";
+    }
+
+    public void UpdateGearText(int i)
+    {
+        gearText.text = ($"Gear:{playerControls.currentGear}");
     }
 }
