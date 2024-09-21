@@ -5,7 +5,8 @@ using UnityEngine;
 public class PlayerControls : MonoBehaviour
 {
     [SerializeField] float steerSpeed = 200f;  // Higher for better rotation speed
-    [SerializeField] float acceleration = 5f;  // Force applied for forward movement
+    [SerializeField] float acceleration = 5f;  // Base force applied for forward movement
+    private float originalAcceleration;
     [SerializeField] float deceleration = 2f;  // Speed of deceleration
     [SerializeField] float maxSpeed = 7f;      // Max speed of the car
 
@@ -22,22 +23,25 @@ public class PlayerControls : MonoBehaviour
 
     public float speedInKMH;
 
+    [SerializeField] private float[] gearAccelerationMultipliers = { 0f, 1.5f, 3f, 1.3f, 1.2f, 1.1f };
+
     private void Start()
     {
         hud = FindObjectOfType<HUD>();
         rb = GetComponent<Rigidbody2D>();
         rb.isKinematic = false;
+        originalAcceleration = acceleration;
     }
 
     private void Update()
     {
 
-   
+
 
         // Calculate speed in km/h
         float speedInMetersPerSecond = rb.velocity.magnitude;
         speedInKMH = speedInMetersPerSecond * 3.6f;
-       
+        currentSpeed = speedInMetersPerSecond;  // Update currentSpeed
 
         StallCar();
 
@@ -54,7 +58,7 @@ public class PlayerControls : MonoBehaviour
                 return;
             }
 
-            if (speedInKMH > gearSpeeds[(int)currentGear] * 0.8f)
+            if (speedInKMH > gearLowestSpeeds[(int)currentGear] * 0.8f)
             {
                 currentGear++;
                 hud.UpdateGearText(((int)currentGear));
@@ -72,11 +76,14 @@ public class PlayerControls : MonoBehaviour
 
         float maxCurrentSpeed = gearSpeeds[(int)currentGear];
 
+        // Calculate adjusted acceleration based on the current gear
+        float adjustedAcceleration = acceleration * gearAccelerationMultipliers[(int)currentGear];
+
         // Apply acceleration or deceleration based on input
         if (movementForward != 0f)  // When player presses W or S
         {
-            // Apply force based on input
-            rb.AddForce(transform.up * movementForward * acceleration, ForceMode2D.Force);
+            // Apply force based on input using adjustedAcceleration
+            rb.AddForce(transform.up * movementForward * adjustedAcceleration , ForceMode2D.Force);
         }
         else
         {
@@ -94,12 +101,12 @@ public class PlayerControls : MonoBehaviour
         float rotation = -steerAmount * steerSpeed * Time.deltaTime;
         rb.MoveRotation(rb.rotation + rotation);
 
-
         if (currentGear == Gear.Neutral)
         {
             currentSpeed = 0f;
         }
 
+        CalculateSteerSpeed(speedInKMH);
     }
 
     public enum Gear
@@ -118,11 +125,21 @@ public class PlayerControls : MonoBehaviour
         {
             return;
         }
-        if (rb.velocity.magnitude < gearLowestSpeeds[(int)currentGear])
+        if (speedInKMH < gearLowestSpeeds[(int)currentGear])
         {
             currentGear = Gear.Neutral;
         }
 
         hud.UpdateGearText(((int)currentGear));
+    }
+
+   float CalculateSteerSpeed(float currentSpeed)
+    {
+        
+        
+        float newSteerSpeed = steerSpeed / currentSpeed;
+        print(newSteerSpeed);
+        
+        return newSteerSpeed;
     }
 }

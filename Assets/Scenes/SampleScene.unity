@@ -1468,7 +1468,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 0, y: 0, z: -84.59802, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -2308,6 +2308,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1776609626}
+  - component: {fileID: 1776609628}
   - component: {fileID: 1776609625}
   - component: {fileID: 1776609624}
   - component: {fileID: 1776609623}
@@ -2331,9 +2332,9 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDrag: 0
-  m_AngularDrag: 0.05
+  m_Mass: 1400
+  m_LinearDrag: 0.2
+  m_AngularDrag: 2
   m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:
@@ -2358,29 +2359,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6c75bf9954990a43aa7a592a9049c93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  steerSpeed: 0.5
-  moveSpeed: 7
-  acceleration: 0.75
+  steerSpeed: 1000
+  acceleration: 500
   deceleration: 1
   maxSpeed: 500
   currentSpeed: 0
   gearSpeeds:
   - 0
-  - 1
-  - 2
-  - 3
-  - 4
-  - 5
+  - 5.55
+  - 11.11
+  - 16.67
+  - 22.23
+  - 27.79
   gearLowestSpeeds:
   - 0
   - 0
-  - 0.65
-  - 1.65
-  - 2.65
-  - 3.65
+  - 10
+  - 25
+  - 40
+  - 55
   currentGear: 0
-  maxCurrentSpeed: 0
-  lowestCurrentSpeed: 0
+  speedInKMH: 0
+  gearAccelerationMultipliers:
+  - 0
+  - 2
+  - 1.6
+  - 1.3
+  - 1.2
+  - 1.1
 --- !u!212 &1776609625
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -2484,6 +2490,24 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 1, y: 2}
   m_Direction: 0
+--- !u!114 &1776609628
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1776609622}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c30636e17c5454142bcb0444a8a07980, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  carHealth: 100
+  transmissionHealth: 100
+  tireHealth: 100
+  suspensionHealth: 100
+  fuelTankHealth: 100
+  odometer: 0
 --- !u!1 &1968080082
 GameObject:
   m_ObjectHideFlags: 0
