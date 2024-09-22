@@ -145,12 +145,41 @@ public class PlayerControls : MonoBehaviour
     }
 
 
-    void ApplyLateralFriction() // need to get car max speed, and use it to reduce this factor when turning
+    float lateralFriction = 1f;  // Controls the grip (0 = no grip, 1 = full grip)
+
+    void ApplyLateralFriction()
     {
         Vector2 rightVelocity = transform.right * Vector2.Dot(rb.velocity, transform.right); // Lateral velocity
         Vector2 forwardVelocity = transform.up * Vector2.Dot(rb.velocity, transform.up); // Forward velocity
 
-        // Reduce lateral velocity to simulate tire grip
-        rb.velocity = forwardVelocity + rightVelocity * 0.05f;  // Adjust 0.05f for more or less slide
+        // Compute the speed factor (higher speeds reduce the grip)
+        float speed = rb.velocity.magnitude;
+        float gripFactor = Mathf.Clamp01(1f - (speed / maxSpeed));  // Decrease grip at higher speeds
+
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            // While left shift is pressed, allow sliding by reducing lateral friction to a very low value
+            lateralFriction = Mathf.Lerp(lateralFriction, 0f, Time.deltaTime * 5f);  // Smoothly reduce friction to 0
+        }
+        else
+        {
+            // When left shift is released, smoothly return the lateral friction to normal
+            lateralFriction = Mathf.Lerp(lateralFriction, 1f, Time.deltaTime * 5f);  // Smoothly increase friction to normal
+        }
+
+        // Apply lateral friction based on the current lateralFriction value
+        rb.velocity = forwardVelocity + rightVelocity * lateralFriction * gripFactor;
+
+        // Optional: Add slight drift effect at high speeds
+        if (speed > maxSpeed * 0.8f && !Input.GetKey(KeyCode.LeftShift))  // When car is above 80% of max speed, and not drifting
+        {
+            rb.velocity += rightVelocity * 0.1f;  // Add slight drift effect
+        }
     }
+
+
+
 }
+
+
+
