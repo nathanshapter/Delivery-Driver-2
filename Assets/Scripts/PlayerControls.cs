@@ -107,6 +107,7 @@ public class PlayerControls : MonoBehaviour
         }
 
         CalculateSteerSpeed(speedInKMH);
+        ApplyLateralFriction();
     }
 
     public enum Gear
@@ -141,5 +142,15 @@ public class PlayerControls : MonoBehaviour
         print(newSteerSpeed);
         
         return newSteerSpeed;
+    }
+
+
+    void ApplyLateralFriction() // need to get car max speed, and use it to reduce this factor when turning
+    {
+        Vector2 rightVelocity = transform.right * Vector2.Dot(rb.velocity, transform.right); // Lateral velocity
+        Vector2 forwardVelocity = transform.up * Vector2.Dot(rb.velocity, transform.up); // Forward velocity
+
+        // Reduce lateral velocity to simulate tire grip
+        rb.velocity = forwardVelocity + rightVelocity * 0.05f;  // Adjust 0.05f for more or less slide
     }
 }
