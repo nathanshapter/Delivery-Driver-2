@@ -24,6 +24,12 @@ public class PlayerControls : MonoBehaviour
     public float speedInKMH;
 
     [SerializeField] private float[] gearAccelerationMultipliers = { 0f, 1.5f, 3f, 1.3f, 1.2f, 1.1f };
+    [SerializeField] private float[] gearDecelerationMultipliers = { 0f, 1.5f, 3f, 1.3f, 1.2f, 1.1f };
+
+    [SerializeField] bool isStalled = false;
+
+
+    [SerializeField] float stalledTurningSpeed = 0.5f;
 
     private void Start()
     {
@@ -35,17 +41,17 @@ public class PlayerControls : MonoBehaviour
 
     private void Update()
     {
-
-
-
         // Calculate speed in km/h
         float speedInMetersPerSecond = rb.velocity.magnitude;
         speedInKMH = speedInMetersPerSecond * 3.6f;
         currentSpeed = speedInMetersPerSecond;  // Update currentSpeed
 
         StallCar();
+       if(currentGear == Gear.Neutral)
+        {
+            isStalled = false;
+        }
 
-        float steerAmount = Input.GetAxis("Horizontal");
         float movementForward = Input.GetAxis("Vertical");
 
         // Gear up and down
@@ -68,11 +74,24 @@ public class PlayerControls : MonoBehaviour
                 print("Go faster to shift up.");
             }
         }
+      
+
         else if (Input.GetKeyDown(KeyCode.DownArrow) && currentGear > Gear.Neutral)
         {
-            currentGear--;
-            hud.UpdateGearText(((int)currentGear));
+            if (isStalled) 
+            {
+                currentGear = Gear.Neutral;
+            }
+            else
+            {
+                currentGear--;
+                hud.UpdateGearText(((int)currentGear));
+            }
+
+
+           
         }
+
 
         float maxCurrentSpeed = gearSpeeds[(int)currentGear];
 
@@ -80,15 +99,15 @@ public class PlayerControls : MonoBehaviour
         float adjustedAcceleration = acceleration * gearAccelerationMultipliers[(int)currentGear];
 
         // Apply acceleration or deceleration based on input
-        if (movementForward != 0f)  // When player presses W or S
+        if (movementForward != 0f && !isStalled)  // When player presses W or S
         {
             // Apply force based on input using adjustedAcceleration
-            rb.AddForce(transform.up * movementForward * adjustedAcceleration , ForceMode2D.Force);
+            rb.AddForce(transform.up * movementForward * adjustedAcceleration, ForceMode2D.Force);
         }
         else
         {
             // If no input is detected, gradually decelerate
-            rb.velocity = Vector2.Lerp(rb.velocity, Vector2.zero, deceleration * Time.deltaTime);
+            rb.velocity = Vector2.Lerp(rb.velocity, Vector2.zero, gearDecelerationMultipliers[(int)currentGear] * Time.deltaTime);
         }
 
         // Clamp the velocity to not exceed the max speed for the current gear
@@ -97,16 +116,10 @@ public class PlayerControls : MonoBehaviour
             rb.velocity = rb.velocity.normalized * maxCurrentSpeed; // Maintain direction but limit speed
         }
 
-        // Rotate the car based on input
-        float rotation = -steerAmount * steerSpeed * Time.deltaTime;
-        rb.MoveRotation(rb.rotation + rotation);
+        // Smooth turning based on speed
+        SteerVehicle(speedInKMH);
 
-        if (currentGear == Gear.Neutral)
-        {
-            currentSpeed = 0f;
-        }
-
-        CalculateSteerSpeed(speedInKMH);
+        // Apply lateral friction for grip and drifting
         ApplyLateralFriction();
     }
 
@@ -128,22 +141,41 @@ public class PlayerControls : MonoBehaviour
         }
         if (speedInKMH < gearLowestSpeeds[(int)currentGear])
         {
-            currentGear = Gear.Neutral;
+            isStalled = true;
+
+
+
+           // currentGear = Gear.Neutral;
         }
 
         hud.UpdateGearText(((int)currentGear));
     }
 
-   float CalculateSteerSpeed(float currentSpeed)
+    // Steering control, smoother at low speeds, less aggressive at high speeds
+    void SteerVehicle(float speedInKMH)
     {
-        
-        
-        float newSteerSpeed = steerSpeed / currentSpeed;
-        print(newSteerSpeed);
-        
-        return newSteerSpeed;
-    }
+        float steerAmount = Input.GetAxis("Horizontal");
 
+        // Calculate a steer factor: at lower speeds, more responsive steering; at higher speeds, smoother steering
+        float steerFactor = Mathf.Lerp(1f, 0.2f, speedInKMH / maxSpeed);  // SteerFactor is stronger at lower speeds
+
+
+
+        // Steer the car based on input
+
+        if (isStalled || currentGear == Gear.Neutral) 
+        {
+            float rotation = -steerAmount * steerSpeed * steerFactor * Time.deltaTime * stalledTurningSpeed;
+            rb.MoveRotation(rb.rotation + rotation);
+        }
+        else
+        {
+            float rotation = -steerAmount * steerSpeed * steerFactor * Time.deltaTime ;
+            rb.MoveRotation(rb.rotation + rotation);
+        }
+        
+        
+    }
 
     float lateralFriction = 1f;  // Controls the grip (0 = no grip, 1 = full grip)
 
@@ -176,10 +208,4 @@ public class PlayerControls : MonoBehaviour
             rb.velocity += rightVelocity * 0.1f;  // Add slight drift effect
         }
     }
-
-
-
 }
-
-
-
