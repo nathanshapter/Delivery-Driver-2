@@ -12,7 +12,8 @@ public class PlayerControls : MonoBehaviour
 
     [SerializeField] private float currentSpeed = 0f;
 
-    [SerializeField] float[] gearSpeeds = { -2f, 0f, 2f, 4f, 6f, 8f };
+    [SerializeField] float[] gearReccomendedSpeeds = { -2f, 0f, 2f, 4f, 6f, 8f };
+    [SerializeField] float[] gearMaxSpeeds = { -2f, 0f, 2f, 4f, 6f, 8f };
     [SerializeField] float[] gearLowestSpeeds;
 
     public Gear currentGear = Gear.Neutral;
@@ -93,7 +94,9 @@ public class PlayerControls : MonoBehaviour
         }
 
 
-        float maxCurrentSpeed = gearSpeeds[(int)currentGear];
+        float maxRecommendedSpeed = gearReccomendedSpeeds[(int)currentGear];
+        float maxSpeed = gearMaxSpeeds[(int)currentGear];
+        
 
         // Calculate adjusted acceleration based on the current gear
         float adjustedAcceleration = acceleration * gearAccelerationMultipliers[(int)currentGear];
@@ -111,9 +114,17 @@ public class PlayerControls : MonoBehaviour
         }
 
         // Clamp the velocity to not exceed the max speed for the current gear
-        if (rb.velocity.magnitude > maxCurrentSpeed)
+        if (rb.velocity.magnitude > maxRecommendedSpeed)
         {
-            rb.velocity = rb.velocity.normalized * maxCurrentSpeed; // Maintain direction but limit speed
+
+            print("exceeding recommended speed");
+          
+            if(rb.velocity.magnitude > maxSpeed)
+            {
+                rb.velocity = rb.velocity.normalized * maxSpeed; // Maintain direction but limit speed
+            }
+            
+           
         }
 
         // Smooth turning based on speed
